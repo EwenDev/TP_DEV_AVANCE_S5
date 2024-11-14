@@ -6,6 +6,9 @@ import java.lang.String;
 
 public class Main {
 	public static void main(String[] args) {
+		new UneFenetreSem();
+
+		/*
 		semaphoreBinaire semaphore = new semaphoreBinaire(1);
 
 		Thread taskA = new Thread(() -> {
@@ -31,7 +34,7 @@ public class Main {
 		});
 
 		taskA.start();
-		taskB.start();
+		taskB.start();*/
 	}
 }
 
