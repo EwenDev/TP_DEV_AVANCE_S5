@@ -2,9 +2,33 @@
 > Réalisé par Ewen GILBERT  
 > *La rédaction et la réalisation des TP ont été réalisés avec l'aide d'outils d'intelligence artificielle.*
 
-## TP 1 - Les Treads Java
+## Table des matières
+- [Introduction](#introduction)
+- [TP 1 - Les Treads Java](#tp-1---les-treads-java-avec-les-mobiles)
+  * [Exercice 1](#exercice-1)
+  * [Exercice 2](#exercice-2)
+  * [Exercice 3](#exercice-3)
+- [TP 2 - Affichage synchronisé](#tp-2---affichage-synchronisé)
+- [TP 2 (bis) - Application des sémaphores sur les mobiles du TP1](#tp2-bis---application-des-sémaphores-sur-les-mobiles-du-tp1)
+
+
+## Introduction
+
+Ce document et ce dépôt ont pour objectif de présenter et de détailler les travaux effectués dans le cadre du cours de programmation avancée de BUT 3, portant sur l'apprentissage de la programmation parallèle et en particulier sur l'utilisation des threads et des sémaphores en Java.
+
+## TP 1 - Les Treads Java avec les mobiles
+
+Ce TP nous a permis d'être introduits au concept de **programmation parallèle** en Java, en utilisant des threads pour contrôler le mouvement de mobiles dans une interface graphique. Nous avons également appris à gérer l'interaction entre les threads et l'interface utilisateur en utilisant des boutons pour contrôler le mouvement des mobiles grâce aux classes UnMobile et UneFenetre.
+
+La programmation parallèle est un concept permettant d'exécuter plusieurs tâches simultanément, ce qui est particulièrement utile pour les applications nécessitant des opérations en temps réel ou des tâches longues. Dans notre cas, nous avons utilisé des threads pour contrôler le mouvement des mobiles, ce qui permet de simuler plusieurs objets mobiles se déplaçant en même temps dans une interface graphique.
+
+Ce concept se base sur la division des tâches en sous-tâches plus petites, permettant notamment de répartir la charge de travail entre plusieurs threads et d'optimiser les performances de l'application en utilisant efficacement les ressources du système.
+
+Voici le diagramme de classe de l'application mobile :
+![DiagrammeDeClasse.png](TP1_Mobile%2FDiagrammeDeClasse.png)
 
 ### Exercice 1
+
 La classe UnMobile représente un objet mobile qui se déplace horizontalement dans une interface graphique, en utilisant un thread pour contrôler son mouvement. L'animation est réalisée en exécutant une boucle dans la méthode run(), qui appelle repaint() à intervalles réguliers pour redessiner le mobile à sa nouvelle position.
 
 Dans la méthode run(), une boucle itère jusqu'à ce que le mobile atteigne le bord droit de la fenêtre. À chaque itération :
