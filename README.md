@@ -38,3 +38,17 @@ Ce bouton permet de mettre en pause et de relancer l'animation du mobile, offran
 
 ### Exercice 3
 
+Pour cet exercice, nous avons modifié UneFenetre afin d'utiliser un GridLayout et afficher deux instances de UnMobile avec leurs boutons respectifs.
+
+#### Changement de la disposition de la fenêtre
+Déjà, j'ai remplacé BorderLayout par un GridLayout avec 2 lignes et 2 colonnes, ce qui permet d’afficher chaque mobile et son bouton dans une grille. 
+
+#### Ajout d'un deuxième mobile
+Ensuite, j'ai ajouté les deux mobiles et de leurs boutons avec deux instances de UnMobile (sonMobile1 et sonMobile2) ont été créées avec leurs propres boutons de contrôle (btnControl1 et btnControl2). Chaque bouton est positionné au-dessus de son mobile correspondant.
+
+#### Gestion des boutons
+Enfin, Chaque bouton utilise un ActionListener distinct pour contrôler l’animation de son mobile en appelant suspend() et resume() sur son propre thread (laThread1 et laThread2). Ce système permet d’arrêter et de relancer chaque mobile de manière indépendante.
+
+Avec cette configuration, l’interface dispose les éléments dans une grille et permet de gérer les deux mobiles individuellement.
+
+---
