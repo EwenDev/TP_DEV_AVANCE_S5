@@ -52,3 +52,64 @@ Enfin, Chaque bouton utilise un ActionListener distinct pour contrôler l’anim
 Avec cette configuration, l’interface dispose les éléments dans une grille et permet de gérer les deux mobiles individuellement.
 
 ---
+## TP 2 - Affichage synchronisé
+
+Dans le cadre de ce TP, nous avons exploré l'utilisation de threads en Java pour synchroniser deux tâches (TA et TB) en utilisant la classe Affichage pour gérer l'affichage à l'écran. Le but est de garantir l'exclusion mutuelle entre les threads, afin que leurs messages s'affichent dans des séquences prédéfinies (AAABB ou BBAAA) et non de manière entrelacée (ABABA). Pour cela, nous avons utilisé des sémaphores binaires pour contrôler l'accès aux sections critiques des threads.
+
+### Analyse du code déjà présent
+
+- **Classe Affichage :** La classe Affichage hérite de Thread, et chaque instance prend un string à afficher. La méthode run parcourt chaque caractère et l'affiche, avec une pause de 100 millisecondes entre chaque caractère pour simuler un délai dans l'affichage.
+
+- **Classe semaphoreBinaire** : Le rôle de cette classe est de contrôler l'accès à la section critique, c'est-à-dire l'endroit où une tâche peut afficher son message sans interruption par une autre. Le sémaphore binaire est modélisé pour avoir deux états : "libre" ou "occupé".
+
+#### Incrémentation et Décrémentation du Sémaphore :
+
+Lorsqu'un sémaphore binaire est initialisé, il reçoit une valeur (1 ou 0). Cette valeur représente la disponibilité de la section critique. Une valeur de 1 indique que la section critique est libre et une valeur de 0 indique qu'elle est occupée.
+
+- **Décrémentation :** Lorsqu'une tâche veut entrer en section critique, elle décrémente la valeur du sémaphore. Si la valeur atteint 0, la tâche obtient l'accès à la section critique. Toute autre tâche essayant de décrémenter à 0 sera bloquée jusqu’à ce que le sémaphore soit réinitialisé.
+
+- **Incrémentation :** Lorsqu’une tâche a terminé son travail en section critique, elle incrémente la valeur. Cela libère la section critique et permet à une autre tâche en attente d'y entrer.
+
+### Classe Main
+
+L'objectif de cette classe est de s'assurer que les messages "AAA" et "BB" générés respectivement par les tâches taskA et taskB s'affichent de manière cohérente, en suivant des séquences de type AAABB ou BBAAA.
+
+```java
+public class Main {
+	public static void main(String[] args) {
+		semaphoreBinaire semaphore = new semaphoreBinaire(1);
+
+		Thread taskA = new Thread(() -> {
+			try {
+				semaphore.syncWait();
+				System.out.println("j'entre en section critique - Task A");
+				new Affichage("AAA").run();
+				System.out.println("je sors de section critique - Task A");
+			} finally {
+				semaphore.syncSignal();
+			}
+		});
+
+		Thread taskB = new Thread(() -> {
+			try {
+				semaphore.syncWait();
+				System.out.println("j'entre en section critique - Task B");
+				new Affichage("BB").run();
+				System.out.println("je sors de section critique - Task B");
+			} finally {
+				semaphore.syncSignal();
+			}
+		});
+
+		taskA.start();
+		taskB.start();
+	}
+}
+```
+
+La classe Main commence par créer une instance de semaphoreBinaire initialisée avec une valeur de 1, indiquant que la section critique est disponible. Ce sémaphore binaire sert à réguler l'accès à la section critique en autorisant une seule tâche à la fois.
+
+Ensuite, on crée deux tâches, taskA et taskB, sous forme d'objets Thread. Ces tâches utilisent des instances de la classe Affichage pour afficher "AAA" et "BB".
+
+Chaque tâche appelle semaphore.syncWait() avant d’accéder à la section critique qui bloque la tâche si la section critique est occupée. Une fois en section critique, on utilise new Affichage(texte).run() pour afficher son message. Après avoir affiché le message, on appelle semaphore.syncSignal() qui libère la section critique pour permettre à l’autre tâche d’y accéder. Les threads taskA et taskB sont démarrés en même temps, et grâce au sémaphore binaire, seule l'une des deux peut entrer en section critique à la fois, ce qui permet d’afficher les messages sans entrelacement indésirable.
+
