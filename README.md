@@ -113,3 +113,10 @@ Ensuite, on crée deux tâches, taskA et taskB, sous forme d'objets Thread. Ces 
 
 Chaque tâche appelle semaphore.syncWait() avant d’accéder à la section critique qui bloque la tâche si la section critique est occupée. Une fois en section critique, on utilise new Affichage(texte).run() pour afficher son message. Après avoir affiché le message, on appelle semaphore.syncSignal() qui libère la section critique pour permettre à l’autre tâche d’y accéder. Les threads taskA et taskB sont démarrés en même temps, et grâce au sémaphore binaire, seule l'une des deux peut entrer en section critique à la fois, ce qui permet d’afficher les messages sans entrelacement indésirable.
 
+## TP2 (bis) - Application des sémaphores sur les mobiles du TP1
+
+Dans cette partie, le but est d'adapter les mobiles pour qu'ils traversent une zone critique au centre de la fenêtre. La zone critique ne peut contenir qu'un mobile à la fois, et la synchronisation est gérée par un sémaphore binaire.
+
+Dans notre cas, la zone critique est définie comme le second tiers de la fenêtre. Un sémaphore binaire assure que cette zone n'est occupée que par un seul mobile à la fois et stoppera les autres mobiles jusqu'à ce que la zone soit libérée.
+
+Ceux-ci appellent syncWait() lorsqu’ils arrivent au début de la zone critique, ce qui les autorise à entrer si la zone est libre. Ensuite, lorsqu'ils sortent de la zone critique, ils appellent syncSignal() pour libérer la zone, permettant à un autre mobile d’y entrer.
