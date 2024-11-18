@@ -6,6 +6,7 @@
       <sourceFolder url="file://$MODULE_DIR$/TP-Dev-Avance" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/TP2_Affichage" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/TP1_Mobile" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/TP3_BAL" isTestSource="false" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
