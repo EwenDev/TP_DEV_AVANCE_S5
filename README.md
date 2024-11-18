@@ -11,6 +11,9 @@
   * [Exercice 3](#exercice-3)
 - [TP 2 - Affichage synchronisé](#tp-2---affichage-synchronisé)
 - [TP 2 (bis) - Application des sémaphores sur les mobiles du TP1](#tp2-bis---application-des-sémaphores-sur-les-mobiles-du-tp1)
+- [TP 3 - Boîte aux lettres et boulangerie](#tp-3--boîte-aux-lettres-et-boulangerie)
+  * [Partie 1 : La Boîte aux Lettres](#partie-1--la-boîte-aux-lettres)
+  * [Partie 2 : La Boulangerie](#partie-2--la-boulangerie)
 
 
 ## Introduction
@@ -295,3 +298,73 @@ Dans ce code, la méthode `send()` **bloque le producteur** tant qu'une lettre e
 
 ![interfaceBAL](./res/interfaceBAL.png)   
 ##### *Figure 7 : Interface de l'application "BAL"*
+
+### Partie 2 : La Boulangerie
+
+La deuxième partie du TP se concentre sur une version plus complexe du producteur-consommateur à travers l'exemple d'une boulangerie. Dans cette version, plusieurs **boulangers** produisent des **pains**, et plusieurs **mangeurs** les consomment, en utilisant une structure de file d'attente bloquante plus évoluée : `ArrayBlockingQueue`.
+
+La classe `Boulangerie` contient une file bloquante de type `ArrayBlockingQueue` qui peut contenir jusqu'à 20 pains. Voici un extrait de cette classe :
+
+```java
+import java.util.concurrent.*;
+
+public  class Boulangerie {
+
+    private BlockingQueue<Pain> queue =  new ArrayBlockingQueue<Pain>(20) ;
+  
+    public  boolean depose(Pain pain)  throws InterruptedException {
+        return queue.offer(pain,  200, TimeUnit.MILLISECONDS) ;
+    }
+  
+    public Pain achete ()  throws InterruptedException {
+        return queue.poll(200, TimeUnit.MILLISECONDS) ;
+    }
+  
+    public  int getStock() {
+        return queue.size() ;
+    }
+}
+```
+
+Ici, la file d'attente permet de gérer efficacement l'accès concurrent aux pains produits par les boulangers. La méthode `offer()` ajoute un pain à la file s'il y a de la place, et que la méthode `poll()` récupère un pain s'il y en a un de disponible.
+
+Les classes `Boulanger` et `Mangeur` implémentent l'interface `Runnable` et représentent respectivement les producteurs et les consommateurs. Voici un extrait de la classe `Boulanger` :
+
+```java
+public class Boulanger implements Runnable {
+    Boulangerie boulangerie;
+
+    public Boulanger(Boulangerie boulangerie) {
+        this.boulangerie = boulangerie;
+    }
+
+    public void run() {
+        try {
+            while (true) {
+                Thread.sleep(1000);
+                boolean added = boulangerie.depose(new Pain());
+                if (added) {
+                    System.out.println("[" + Thread.currentThread().getName() + "] [" + boulangerie.getStock() + "] je livre.");
+                } else {
+                    System.out.println("[" + Thread.currentThread().getName() + "] [" + boulangerie.getStock() + "] la boulangerie est pleine.");
+                }
+            }
+        } catch (InterruptedException e) {
+            System.out.println("[" + Thread.currentThread().getName() + "] je m'arrête");
+        }
+    }
+}
+```
+
+Les boulangers ajoutent des pains à la boulangerie, et les mangeurs tentent de les récupérer. Les méthodes sont conçues pour attendre et réessayer jusqu'à ce qu'une opération soit possible, ce qui permet de simuler la dynamique d'une boulangerie où les pains sont produits et consommés de façon asynchrone.
+
+![DiagrammeDeClasseTP3_2](./res/DiagrammeDeClasseTP3_2.png)
+##### *Figure 8 : Diagramme de classe de l'exemple de la Boulangerie*
+
+### Parallèle entre Partie 1 et Partie 2
+
+Dans la première partie, la boîte aux lettres (BAL) ne pouvait contenir qu'**une seule lettre à la fois**, et nous avions un seul producteur et un seul consommateur. La synchronisation était gérée manuellement à l'aide des méthodes `wait()` et `notify()`. Chaque élément était placé et retiré de manière individuelle.
+
+Dans la deuxième partie, la boulangerie introduit une dimension plus complexe : **plusieurs producteurs et consommateurs**, ainsi qu'une capacité maximale de 20 pains à la fois. Plutôt que de gérer la synchronisation directement, nous utilisons une `ArrayBlockingQueue`, qui simplifie la coordination entre les threads producteurs et consommateurs.
+
+Pour conclure, la deuxième partie permet de mettre en avant les avantages de l'utilisation d'éléments prêts à l'emploi en Java pour la gestion des problèmes de synchronisation, surtout lorsque plusieurs threads sont utilisées. `ArrayBlockingQueue` gère automatiquement la coordination entre les threads, ce qui évite les erreurs de synchronisation.
