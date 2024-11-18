@@ -233,3 +233,65 @@ public void run() {
 ##### *Figure 5 : Diagramme de classe de l'application "Mobiles" avec sémaphores*
 
 ---
+
+## TP 3 : Boîte aux lettres et boulangerie
+
+Le TP 3 introduit le concept de **Blocking Queue**, en commençant par une première implémentation guidée, puis une version plus complexe reprenant l'exemple de la boulangerie à partir de [ce cours](https://blog.paumard.org/cours/java-api/chap05-concurrent-queues.html) pour mieux comprendre la synchronisation des threads.
+
+### Partie 1 : La Boîte aux Lettres (BAL)
+
+La première partie du TP consiste à implémenter une simple **boîte aux lettres** entre un **producteur** et un **consommateur**. Le producteur est chargé de déposer une lettre dans la boîte (illustré par la classe `Deposer`), tandis que le consommateur est chargé de la retirer (illustré par la classe `Retirer`).
+
+Les règles de fonctionnement de la boîte aux lettres sont les suivantes :
+- Le producteur ne peut **déposer** une lettre **que si la boîte est vide**.
+- Le consommateur ne peut **retirer** une lettre **que si la boîte n'est pas vide**.
+
+Ainsi, il est nécessaire d'utiliser des mécanismes de **synchronisation** pour s'assurer que ces conditions sont respectées. La classe `BAL` représente cette boîte aux lettres, et les méthodes `send()` et `receive()` utilisent les instructions `wait()` et `notify()` pour gérer la synchronisation entre les threads.
+
+Voici un extrait de la classe `BAL` :
+
+```java
+public synchronized void send(String lettre) {
+    try {
+        while(depotLettre != null) {
+          wait(); // Bloque le producteur si la boîte n'est pas vide
+        }
+    
+        System.out.println("Dépose: " + lettre);
+        textLeft.append("Dépose: " + lettre + "\n");
+        depotLettre = lettre;
+        notify(); // Notifie le consommateur que la boîte n'est plus vide
+    }
+    catch(InterruptedException e) {
+        e.printStackTrace();
+    }
+}
+
+public synchronized String receive() {
+    try {
+        while (depotLettre == null) {
+          wait(); // Bloque le consommateur si la boîte est vide
+        }
+        String lettre = depotLettre;
+    
+        depotLettre = null;
+        notify(); // Notifie le producteur que la boîte est vide
+    
+        System.out.println("Retire: " + lettre);
+        textRight.append("Retire: " + lettre + "\n");
+        return lettre;
+    }
+    catch(InterruptedException e) {
+        e.printStackTrace();
+        return "echec";
+    }
+}
+```
+
+Dans ce code, la méthode `send()` **bloque le producteur** tant qu'une lettre est présente dans la boîte, et la méthode `receive()` **bloque le consommateur** si la boîte est vide. Lorsque la boîte change d'état, **le thread en attente est notifié**.
+
+![DiagrammeDeClasseTP3_1](./res/DiagrammeDeClasseTP3_1.png)   
+##### *Figure 6 : Diagramme de classe de l'application "BAL"*
+
+![interfaceBAL](./res/interfaceBAL.png)   
+##### *Figure 7 : Interface de l'application "BAL"*
