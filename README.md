@@ -145,8 +145,91 @@ Chaque tâche appelle `semaphore.syncWait()` avant d’accéder à la section cr
 
 ## TP2 (bis) - Application des sémaphores sur les mobiles du TP1
 
-Dans cette partie, le but est d'adapter les mobiles pour qu'ils traversent une zone critique au centre de la fenêtre. La zone critique ne peut contenir qu'un mobile à la fois, et la synchronisation est gérée par un sémaphore binaire.
+Dans cette partie, le but est d'adapter les mobiles pour qu'ils traversent une **zone critique au centre de la fenêtre**. La zone critique ne peut contenir qu'**un mobile à la fois**, et la synchronisation est gérée par un **sémaphore binaire**.
 
-Dans notre cas, la zone critique est définie comme le second tiers de la fenêtre. Un sémaphore binaire assure que cette zone n'est occupée que par un seul mobile à la fois et stoppera les autres mobiles jusqu'à ce que la zone soit libérée.
+Dans notre cas, la **zone critique** est définie comme le second tiers de la fenêtre comme illustré sur la figure 4. Un **sémaphore binaire** assure que cette zone n'est occupée que par **un seul mobile à la fois** et **stoppera les autres mobiles** jusqu'à ce que la zone soit libérée.
 
-Ceux-ci appellent syncWait() lorsqu’ils arrivent au début de la zone critique, ce qui les autorise à entrer si la zone est libre. Ensuite, lorsqu'ils sortent de la zone critique, ils appellent syncSignal() pour libérer la zone, permettant à un autre mobile d’y entrer.
+Ceux-ci appellent `syncWait()` lorsqu’ils arrivent au début de la zone critique, ce qui les autorise à entrer si la zone est libre. Ensuite, lorsqu'ils **sortent de la zone critique**, ils appellent `syncSignal()` pour libérer la zone, permettant à un autre mobile d’y entrer.
+
+Extrait du code de [UneFenetreSem.java](./TP2_Affichage/UneFenetreSem.java) permettant d'initialiser un mobile :
+```java
+public UneFenetreSem() {
+    semaphore = new semaphoreBinaire(1);
+    setLayout(new GridLayout(4, 1));
+
+    mobile1 = new UnMobileSem(LARG, HAUT / 4, semaphore);
+    add(mobile1);
+    new Thread(mobile1).start();
+
+    // Initialisation des autres mobiles...
+
+}
+```
+
+Extrait du code de [UnMobileSem.java](./TP2_Affichage/UnMobileSem.java) permettant de gérer le déplacement du mobile dans la zone critique:
+```java
+public void run() {
+        while (true) {
+            if (directionDroite) {
+                sonDebDessin += sonPas; // Déplacement vers la droite
+            } else {
+                sonDebDessin -= sonPas; // Déplacement vers la gauche
+            }
+
+            if (sonDebDessin >= saLargeur) { // Si le mobile atteint le bord droit, on change de direction
+                directionDroite = false;
+            } else if (sonDebDessin <= 0) { // Si le mobile atteint le bord gauche, on change de direction
+                directionDroite = true;
+            }
+
+            if (sonDebDessin >= saLargeur / 3 && sonDebDessin <= 2 * saLargeur / 3) { // Si le mobile atteint dans la zone critique
+                if (directionDroite) { // Si le mobile se déplace vers la droite
+                    semaphore.syncWait(); // On bloque le mobile si la zone critique est occupée
+
+                    // Une fois le syncWait dépassé (donc que la zone critique est libre), on continue le déplacement
+                    while (sonDebDessin <= 2 * saLargeur / 3 && directionDroite) {
+                        sonDebDessin += sonPas;
+                        repaint();
+                        try {
+                            Thread.sleep(sonTemps);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    semaphore.syncSignal(); // On libère la zone critique
+
+                } else { // Si le mobile se déplace vers la gauche
+                    semaphore.syncWait(); // On bloque le mobile si la zone critique est occupée
+
+                    // Une fois le syncWait dépassé (donc que la zone critique est libre), on continue le déplacement
+                    while (sonDebDessin >= saLargeur / 3 && !directionDroite) {
+                        sonDebDessin -= sonPas;
+                        repaint();
+                        try {
+                            Thread.sleep(sonTemps);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    semaphore.syncSignal(); // On libère la zone critique
+                }
+            }
+
+            repaint(); // Sinon, on continue le déplacement
+
+            try {
+                Thread.sleep(sonTemps);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+```
+
+![interfaceMobilesSem](./res/zoneCritiqueMobiles.png)   
+##### *Figure 4 : Les mobiles et la zone critique*
+
+![DiagrammeDeClasseTP2](./res/DiagrammeDeClasseTP2.png)   
+##### *Figure 5 : Diagramme de classe de l'application "Mobiles" avec sémaphores*
+
+---
